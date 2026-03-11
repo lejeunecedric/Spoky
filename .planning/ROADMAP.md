@@ -29,10 +29,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. User can launch the app and see an empty state UI
   2. App stores and retrieves data persistently between sessions
   3. Protocol adapter architecture is ready for Discord integration
-**Plans**: TBD
+**Plans**: 3 plans in 2 waves
 
-Plans:
-- [ ] 01-01: [TBD during planning]
+**Wave 1:**
+- [ ] 01-01: Tauri + Svelte project setup with IPC verification
+
+**Wave 2:**
+- [ ] 01-02: SQLite database with full v1 schema and migrations
+- [ ] 01-03: Protocol adapter trait, event system, and registry
 
 ### Phase 2: Discord Integration
 **Goal**: User can connect Discord and message with Discord contacts
@@ -111,7 +115,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/3 | Not started | - |
 | 2. Discord Integration | 0/TBD | Not started | - |
 | 3. WhatsApp Integration | 0/TBD | Not started | - |
 | 4. Signal Integration | 0/TBD | Not started | - |

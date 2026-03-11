@@ -1,0 +1,29 @@
+{
+  "name": "spoky",
+  "version": "0.1.0",
+  "description": "Spoky - A multi-protocol chat client",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0",
+    "@tauri-apps/plugin-sql": "^2.0"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0",
+    "@sveltejs/kit": "^2.5",
+    "@sveltejs/vite-plugin-svelte": "^3.0",
+    "@tauri-apps/cli": "^2.0",
+    "svelte": "^5.25",
+    "svelte-check": "^4.0",
+    "typescript": "^5.4",
+    "vite": "^5.2"
+  }
+}
