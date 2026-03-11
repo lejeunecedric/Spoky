@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans in 2 waves
 
 **Wave 1:**
-- [ ] 01-01: Tauri + Svelte project setup with IPC verification
+- [x] 01-01: Tauri + Svelte project setup with IPC verification
 
 **Wave 2:**
 - [ ] 01-02: SQLite database with full v1 schema and migrations
@@ -115,7 +115,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 1/3 | In progress | 01-01 |
 | 2. Discord Integration | 0/TBD | Not started | - |
 | 3. WhatsApp Integration | 0/TBD | Not started | - |
 | 4. Signal Integration | 0/TBD | Not started | - |
