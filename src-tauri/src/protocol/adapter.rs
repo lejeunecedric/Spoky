@@ -7,11 +7,17 @@ use crate::models::{Account, Conversation, Message, Protocol};
 use super::events::{ConnectionStatus, ProtocolEvent};
 use super::ProtocolError;
 
+use tauri::AppHandle;
+
 /// Trait that all protocol implementations must satisfy
 #[async_trait]
 pub trait ProtocolAdapter: Send + Sync {
     /// Return the protocol type this adapter handles
     fn protocol(&self) -> Protocol;
+
+    /// Set the app handle for Tauri event emission
+    /// Must be called before connect() for adapters that use direct event emission
+    fn set_app_handle(&mut self, app_handle: AppHandle);
 
     /// Connect to the protocol service
     /// Returns initial connection status

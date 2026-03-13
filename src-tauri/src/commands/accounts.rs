@@ -248,7 +248,7 @@ pub async fn connect_discord_account(
     let factory = DiscordAdapterFactory::new();
 
     // Connect via registry
-    registry.connect_account(&account, &factory)
+    registry.connect_account(app, &account, &factory)
         .await
         .map_err(|e| format!("Failed to connect account: {}", e))?;
 

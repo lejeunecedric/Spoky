@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use tauri::AppHandle;
 use crate::models::{Account, Conversation, Message};
 use crate::protocol::adapter::{ProtocolAdapter, ProtocolAdapterFactory};
 use crate::protocol::events::{ProtocolEvent, ConnectionStatus};
@@ -32,6 +33,7 @@ impl ProtocolRegistry {
     /// Register and connect a protocol adapter for an account
     pub async fn connect_account(
         &self,
+        app_handle: AppHandle,
         account: &Account,
         factory: &dyn ProtocolAdapterFactory,
     ) -> Result<(), ProtocolError> {
@@ -44,6 +46,9 @@ impl ProtocolRegistry {
             // Send event through channel - don't block
             let _ = sender.try_send(event);
         }));
+
+        // Set app handle for direct Tauri event emission
+        adapter.set_app_handle(app_handle);
 
         // Connect to protocol
         log::info!(
@@ -186,6 +191,10 @@ impl ProtocolAdapter for StubAdapter {
     fn protocol(&self,
     ) -> crate::models::Protocol {
         self.protocol.clone()
+    }
+
+    fn set_app_handle(&mut self, _app_handle: AppHandle) {
+        // Stub adapter doesn't use app handle
     }
 
     async fn connect(
