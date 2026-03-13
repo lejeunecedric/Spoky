@@ -40,3 +40,8 @@ impl serde::Serialize for ProtocolError {
         serializer.serialize_str(&self.to_string())
     }
 }
+
+// Re-export public types
+pub use adapter::{ProtocolAdapter, AdapterInfo, AdapterFeature};
+pub use events::{ProtocolEvent, ConnectionEvent, MessageEvent, ConversationEvent, ProtocolErrorEvent, ConnectionStatus};
+pub use registry::{ProtocolRegistry, StubAdapter};
