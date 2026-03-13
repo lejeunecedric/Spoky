@@ -13,7 +13,7 @@ Spoky delivers a unified messaging experience by progressively integrating three
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - App infrastructure, database, and protocol abstraction layer
-- [ ] **Phase 2: Discord Integration** - First working protocol with core messaging features
+- [x] **Phase 2: Discord Integration** - First working protocol with core messaging features (IN PROGRESS)
 - [ ] **Phase 3: WhatsApp Integration** - QR code authentication and protocol expansion
 - [ ] **Phase 4: Signal Integration** - Device linking to complete protocol coverage
 - [ ] **Phase 5: Media Support** - Image and file sharing across all protocols
@@ -51,7 +51,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: [TBD during planning]
+- [ ] 02-01: Discord integration with bot token auth, conversation sync, messaging UI
 
 ### Phase 3: WhatsApp Integration
 **Goal**: User can connect WhatsApp and message with WhatsApp contacts
