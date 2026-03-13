@@ -20,6 +20,12 @@ log = "0.4"
 async-trait = "0.1"
 thiserror = "1.0"
 
+# Discord integration
+serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "rustls_backend", "model"] }
+aes-gcm = "0.10"
+base64 = "0.22"
+rand = "0.8"
+
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]

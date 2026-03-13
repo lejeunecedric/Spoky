@@ -3,6 +3,7 @@
 //! Provides the trait interface and event system for chat protocol integrations.
 
 pub mod adapter;
+pub mod discord;
 pub mod events;
 pub mod registry;
 
