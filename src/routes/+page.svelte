@@ -1,76 +1,153 @@
 <script lang="ts">
-  import { invoke } from '@tauri-apps/api/core';
+  import { onMount } from 'svelte';
+  import { listen } from '@tauri-apps/api/event';
+  import { accounts } from '$lib/stores/accounts';
+  import { conversations } from '$lib/stores/conversations';
+  import { messages } from '$lib/stores/messages';
+  
+  import AccountManager from '$lib/components/AccountManager.svelte';
+  import ConversationList from '$lib/components/ConversationList.svelte';
+  import ConversationView from '$lib/components/ConversationView.svelte';
+  import MessageInput from '$lib/components/MessageInput.svelte';
 
-  let name = $state('Spoky');
-  let greetMsg = $state('');
+  // Listen for protocol events to update UI in real-time
+  onMount(() => {
+    const unlisten = listen('protocol:event', (event: any) => {
+      console.log('Protocol event received:', event);
+      
+      // Handle different event types
+      switch (event.payload?.type) {
+        case 'MessageReceived':
+          const msg = event.payload.payload?.message;
+          if (msg) {
+            // Update conversations store with new message preview
+            conversations.updateLastMessage(
+              msg.conversation_id,
+              msg.content.slice(0, 100),
+              msg.sent_at
+            );
+          }
+          break;
+          
+        case 'ConversationUpdated':
+          // Reload conversations to show new/updated conversation
+          conversations.load();
+          break;
+          
+        case 'ConnectionChanged':
+          // Reload accounts to get updated connection status
+          accounts.load();
+          break;
+      }
+    });
 
-  async function greet() {
-    greetMsg = await invoke('greet', { name });
-  }
+    // Load initial data
+    accounts.load();
+    conversations.load();
+
+    return () => {
+      unlisten.then(fn => fn());
+    };
+  });
 </script>
 
-<main class="container">
-  <h1>Hello Spoky</h1>
-  
-  <div class="row">
-    <input
-      id="greet-input"
-      placeholder="Enter a name..."
-      bind:value={name}
-    />
-    <button onclick={greet}>Greet</button>
-  </div>
-  
-  {#if greetMsg}
-    <p class="greet-message">{greetMsg}</p>
-  {/if}
-</main>
+<div class="app-container">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>Spoky</h1>
+    </div>
+    <div class="sidebar-content">
+      <AccountManager />
+      <div class="conversation-list-wrapper">
+        <ConversationList />
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <ConversationView />
+    <MessageInput />
+  </main>
+</div>
 
 <style>
-  .container {
+  :global(body) {
     margin: 0;
-    padding-top: 10vh;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f3f4f6;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  .app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .sidebar {
+    width: 320px;
+    min-width: 280px;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    text-align: center;
+    background: white;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
   }
 
-  h1 {
-    margin-bottom: 2rem;
-    color: #333;
+  .logo {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
   }
 
-  .row {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  input {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-    background-color: #0078d4;
+  .logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
+    letter-spacing: -0.025em;
   }
 
-  button:hover {
-    background-color: #006cbd;
+  .sidebar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .greet-message {
-    margin-top: 2rem;
-    font-size: 1.2rem;
-    color: #006cbd;
+  .conversation-list-wrapper {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f9fafb;
+    min-width: 0;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+      max-width: none;
+    }
+
+    .main-content {
+      display: none;
+    }
   }
 </style>
