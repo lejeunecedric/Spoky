@@ -11,26 +11,26 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **ACCT-01**: User can connect one WhatsApp account via QR code scan
 - [ ] **ACCT-02**: User can connect one Signal account via device linking
-- [ ] **ACCT-03**: User can connect one Discord account via bot token
-- [ ] **ACCT-04**: User sees connection status for each protocol (connected, connecting, disconnected, error)
-- [ ] **ACCT-05**: User can disconnect an account
-- [ ] **ACCT-06**: User can reconnect a disconnected account
-- [ ] **ACCT-07**: Account credentials are stored securely between sessions
+- [x] **ACCT-03**: User can connect one Discord account via bot token
+- [x] **ACCT-04**: User sees connection status for each protocol (connected, connecting, disconnected, error)
+- [x] **ACCT-05**: User can disconnect an account
+- [x] **ACCT-06**: User can reconnect a disconnected account
+- [x] **ACCT-07**: Account credentials are stored securely between sessions
 
 ### Messaging
 
-- [ ] **MSG-01**: User sees unified conversation list combining all connected protocols
-- [ ] **MSG-02**: User sees protocol badge on each conversation indicating its network
-- [ ] **MSG-03**: User can open a conversation and view message history
-- [ ] **MSG-04**: User can send a text message in an open conversation
-- [ ] **MSG-05**: User can reply to a specific message
-- [ ] **MSG-06**: User can start a new text conversation (where protocol supports)
+- [x] **MSG-01**: User sees unified conversation list combining all connected protocols
+- [x] **MSG-02**: User sees protocol badge on each conversation indicating its network
+- [x] **MSG-03**: User can open a conversation and view message history
+- [x] **MSG-04**: User can send a text message in an open conversation
+- [x] **MSG-05**: User can reply to a specific message
+- [x] **MSG-06**: User can start a new text conversation (where protocol supports)
 - [ ] **MSG-07**: User can send an image in a conversation
 - [ ] **MSG-08**: User can send a file attachment in a conversation
 - [ ] **MSG-09**: User can view received images in a conversation
 - [ ] **MSG-10**: User can download received file attachments
 - [ ] **MSG-11**: Messages persist locally between app sessions
-- [ ] **MSG-12**: New messages appear in real-time without manual refresh
+- [x] **MSG-12**: New messages appear in real-time without manual refresh
 
 ### Notifications
 
@@ -42,10 +42,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### UI
 
-- [ ] **UI-01**: App displays conversation list in a sidebar
-- [ ] **UI-02**: App displays selected conversation in main pane
-- [ ] **UI-03**: App displays message input field in conversation view
-- [ ] **UI-04**: App displays connection status indicator for each protocol
+- [x] **UI-01**: App displays conversation list in a sidebar
+- [x] **UI-02**: App displays selected conversation in main pane
+- [x] **UI-03**: App displays message input field in conversation view
+- [x] **UI-04**: App displays connection status indicator for each protocol
 - [ ] **UI-05**: App displays error states when protocol connection fails
 - [ ] **UI-06**: User can attach image or file via message input
 
@@ -105,32 +105,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | ACCT-01 | Phase 3 | Pending |
 | ACCT-02 | Phase 4 | Pending |
-| ACCT-03 | Phase 2 | Pending |
-| ACCT-04 | Phase 2 | Pending |
-| ACCT-05 | Phase 2 | Pending |
-| ACCT-06 | Phase 2 | Pending |
-| ACCT-07 | Phase 2 | Pending |
-| MSG-01 | Phase 2 | Pending |
-| MSG-02 | Phase 2 | Pending |
-| MSG-03 | Phase 2 | Pending |
-| MSG-04 | Phase 2 | Pending |
-| MSG-05 | Phase 2 | Pending |
-| MSG-06 | Phase 2 | Pending |
+| ACCT-03 | Phase 2 | Complete |
+| ACCT-04 | Phase 2 | Complete |
+| ACCT-05 | Phase 2 | Complete |
+| ACCT-06 | Phase 2 | Complete |
+| ACCT-07 | Phase 2 | Complete |
+| MSG-01 | Phase 2 | Complete |
+| MSG-02 | Phase 2 | Complete |
+| MSG-03 | Phase 2 | Complete |
+| MSG-04 | Phase 2 | Complete |
+| MSG-05 | Phase 2 | Complete |
+| MSG-06 | Phase 2 | Complete |
 | MSG-07 | Phase 5 | Pending |
 | MSG-08 | Phase 5 | Pending |
 | MSG-09 | Phase 5 | Pending |
 | MSG-10 | Phase 5 | Pending |
 | MSG-11 | Phase 1 | Pending |
-| MSG-12 | Phase 2 | Pending |
+| MSG-12 | Phase 2 | Complete |
 | NTFY-01 | Phase 6 | Pending |
 | NTFY-02 | Phase 6 | Pending |
 | NTFY-03 | Phase 6 | Pending |
 | NTFY-04 | Phase 6 | Pending |
 | NTFY-05 | Phase 6 | Pending |
-| UI-01 | Phase 2 | Pending |
-| UI-02 | Phase 2 | Pending |
-| UI-03 | Phase 2 | Pending |
-| UI-04 | Phase 2 | Pending |
+| UI-01 | Phase 2 | Complete |
+| UI-02 | Phase 2 | Complete |
+| UI-03 | Phase 2 | Complete |
+| UI-04 | Phase 2 | Complete |
 | UI-05 | Phase 3 | Pending |
 | UI-06 | Phase 5 | Pending |
 
