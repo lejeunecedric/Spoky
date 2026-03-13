@@ -123,7 +123,7 @@ impl DiscordEventHandler {
 impl EventHandler for DiscordEventHandler {
     /// Called when the bot is ready/connected to the Gateway
     async fn ready(&self, _ctx: Context, ready: Ready) {
-        log::info!("Discord Gateway connected as {}", ready.user.name);
+        log::info!("Discord Gateway connected as {} (id: {})", ready.user.name, ready.user.id);
         
         // Store the bot user ID for outgoing message detection
         let mut bot_id = self.bot_user_id.write().await;
