@@ -3,8 +3,10 @@
 
 use tauri::Manager;
 
+mod commands;
 mod db;
 mod models;
+mod protocol;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -25,9 +27,28 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::new().build())
         .setup(|app| {
-            // Initialize database on app startup
             let app_handle = app.handle().clone();
 
+            // Create event channel for protocol events
+            let (event_tx, mut event_rx) =
+                tokio::sync::mpsc::channel::<protocol::events::ProtocolEvent>(100);
+
+            // Create protocol registry
+            let registry = protocol::registry::ProtocolRegistry::new(event_tx);
+            app.manage(registry);
+
+            // Spawn event forwarder task
+            // Receives from channel and emits to frontend via Tauri
+            let app_handle_clone = app_handle.clone();
+            tauri::async_runtime::spawn(async move {
+                while let Some(event) = event_rx.recv().await {
+                    if let Err(e) = app_handle_clone.emit("protocol:event", &event) {
+                        log::error!("Failed to emit protocol event: {}", e);
+                    }
+                }
+            });
+
+            // Initialize database on app startup
             tauri::async_runtime::spawn(async move {
                 match db::init_db(&app_handle).await {
                     Ok(database) => {
@@ -43,7 +64,15 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, test_db_connection])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            test_db_connection,
+            commands::protocol::connect_account,
+            commands::protocol::disconnect_account,
+            commands::protocol::get_connection_status,
+            commands::protocol::get_connected_accounts,
+            commands::protocol::test_protocol_events,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
