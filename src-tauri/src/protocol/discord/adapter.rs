@@ -9,7 +9,9 @@ use crate::protocol::adapter::{ProtocolAdapter, ProtocolAdapterFactory};
 use crate::protocol::events::{ProtocolEvent, ConnectionStatus, ConnectionEvent, MessageEvent};
 use crate::protocol::ProtocolError;
 
-use super::DiscordError;
+use super::{DiscordError, DiscordEventHandler};
+use serenity::model::gateway::GatewayIntents;
+use tauri::Manager;
 
 /// Discord protocol adapter
 /// 
@@ -18,8 +20,8 @@ use super::DiscordError;
 pub struct DiscordAdapter {
     /// Serenity HTTP client for REST API calls
     http_client: Option<Arc<serenity::http::Http>>,
-    /// Gateway client for real-time events
-    client: Option<serenity::Client>,
+    /// Gateway client task handle for lifecycle management
+    client_handle: Option<tokio::task::JoinHandle<()>>,
     /// Current connection status
     status: ConnectionStatus,
     /// Event callback for sending events to frontend
@@ -28,6 +30,8 @@ pub struct DiscordAdapter {
     account_id: Option<String>,
     /// Bot token (encrypted at rest, decrypted in memory)
     bot_token: Option<String>,
+    /// App handle for creating event handlers
+    app_handle: Option<tauri::AppHandle>,
 }
 
 impl DiscordAdapter {
@@ -35,12 +39,18 @@ impl DiscordAdapter {
     pub fn new() -> Self {
         Self {
             http_client: None,
-            client: None,
+            client_handle: None,
             status: ConnectionStatus::Disconnected,
             event_callback: None,
             account_id: None,
             bot_token: None,
+            app_handle: None,
         }
+    }
+
+    /// Set the app handle (must be called before connect for Gateway)
+    pub fn set_app_handle(&mut self, app_handle: tauri::AppHandle) {
+        self.app_handle = Some(app_handle);
     }
 
     /// Get the HTTP client if connected
@@ -158,9 +168,9 @@ impl ProtocolAdapter for DiscordAdapter {
 
         // Create HTTP client
         let http = serenity::http::Http::new(&bot_token);
-        
+
         // Verify token by fetching current user
-        match http.get_current_user().await {
+        let bot_user = match http.get_current_user().await {
             Ok(user) => {
                 log::info!("Connected to Discord as {}", user.name);
                 self.http_client = Some(Arc::new(http));
@@ -169,6 +179,7 @@ impl ProtocolAdapter for DiscordAdapter {
                     ConnectionStatus::Connected,
                     Some(format!("Connected as {}", user.name)),
                 );
+                user
             }
             Err(e) => {
                 let err_msg = format!("Failed to authenticate: {}", e);
@@ -177,6 +188,43 @@ impl ProtocolAdapter for DiscordAdapter {
                 self.emit_connection_change(ConnectionStatus::Error, Some(err_msg));
                 return Err(DiscordError::InvalidToken.into());
             }
+        };
+
+        // Initialize Gateway client for real-time events
+        if let Some(ref app_handle) = self.app_handle {
+            // Configure gateway intents
+            let intents = GatewayIntents::GUILDS
+                | GatewayIntents::GUILD_MESSAGES
+                | GatewayIntents::DIRECT_MESSAGES;
+
+            // Create event handler
+            let handler = DiscordEventHandler::new(app_handle.clone(), account.id.clone());
+
+            // Build serenity client
+            match serenity::Client::builder(&bot_token, intents)
+                .event_handler(handler)
+                .await
+            {
+                Ok(mut client) => {
+                    // Start client in background task
+                    let client_handle = tokio::spawn(async move {
+                        log::info!("Starting Discord Gateway client...");
+                        if let Err(why) = client.start().await {
+                            log::error!("Discord Gateway error: {:?}", why);
+                        }
+                        log::info!("Discord Gateway client stopped");
+                    });
+
+                    self.client_handle = Some(client_handle);
+                    log::info!("Discord Gateway client initialized for {}", bot_user.name);
+                }
+                Err(e) => {
+                    // Gateway failure is non-fatal - HTTP client still works
+                    log::warn!("Discord Gateway initialization failed: {}. Real-time messages unavailable.", e);
+                }
+            }
+        } else {
+            log::warn!("No app_handle set - Discord Gateway not initialized. Call set_app_handle() before connect().");
         }
 
         Ok(self.status)
@@ -184,13 +232,10 @@ impl ProtocolAdapter for DiscordAdapter {
 
     async fn disconnect(&mut self,
     ) -> Result<(), ProtocolError> {
-        if self.client.is_some() {
-            // Graceful shutdown of gateway client
-            if let Some(client) = self.client.take() {
-                // serenity Client doesn't have explicit shutdown, 
-                // it stops when dropped
-                drop(client);
-            }
+        // Abort Gateway client task if running
+        if let Some(handle) = self.client_handle.take() {
+            handle.abort();
+            log::info!("Discord Gateway client aborted");
         }
 
         self.http_client = None;
