@@ -52,6 +52,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 02-01: Discord integration with bot token auth, conversation sync, messaging UI
+- [ ] 02-02: Discord Gateway real-time message reception (gap closure - MSG-12)
+- [ ] 02-03: Reply UI and new conversation flow (gap closure - MSG-05, MSG-06)
 
 ### Phase 3: WhatsApp Integration
 **Goal**: User can connect WhatsApp and message with WhatsApp contacts
