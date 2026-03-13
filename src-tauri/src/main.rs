@@ -67,11 +67,28 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             greet,
             test_db_connection,
+            // Protocol commands
             commands::protocol::connect_account,
             commands::protocol::disconnect_account,
             commands::protocol::get_connection_status,
             commands::protocol::get_connected_accounts,
             commands::protocol::test_protocol_events,
+            // Account commands
+            commands::accounts::create_account,
+            commands::accounts::delete_account,
+            commands::accounts::get_accounts,
+            commands::accounts::get_account,
+            commands::accounts::connect_discord_account,
+            // Conversation commands
+            commands::conversations::get_conversations,
+            commands::conversations::get_conversation,
+            commands::conversations::get_conversations_for_account,
+            commands::conversations::mark_conversation_read,
+            commands::conversations::sync_conversations,
+            // Message commands
+            commands::messages::get_messages,
+            commands::messages::send_message,
+            commands::messages::sync_messages,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
