@@ -60,6 +60,15 @@ pub trait ProtocolAdapter: Send + Sync {
         reply_to_message_id: Option<&str>,
     ) -> Result<Message, ProtocolError>;
 
+    /// Create a new direct message conversation with a user
+    /// 
+    /// # Arguments
+    /// * `user_id` - The user ID to create a DM with
+    async fn create_dm_conversation(
+        &self,
+        user_id: &str,
+    ) -> Result<Conversation, ProtocolError>;
+
     /// Set callback for protocol events
     /// The adapter calls this when messages arrive, connection changes, etc.
     fn on_event(

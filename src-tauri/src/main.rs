@@ -85,6 +85,7 @@ fn main() {
             commands::conversations::get_conversations_for_account,
             commands::conversations::mark_conversation_read,
             commands::conversations::sync_conversations,
+            commands::conversations::create_dm_conversation,
             // Message commands
             commands::messages::get_messages,
             commands::messages::send_message,

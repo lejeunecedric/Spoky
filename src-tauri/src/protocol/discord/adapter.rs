@@ -59,6 +59,28 @@ impl DiscordAdapter {
             .ok_or(DiscordError::GatewayError("Not connected".to_string()))
     }
 
+    /// Convert a Discord private channel to Spoky Conversation model
+    fn private_channel_to_conversation(&self, channel: &serenity::model::channel::PrivateChannel) -> Conversation {
+        let name = channel.recipient.as_ref()
+            .map(|u| u.name.clone())
+            .unwrap_or_else(|| "Direct Message".to_string());
+        
+        let recipient_name = channel.recipient.as_ref()
+            .map(|u| u.name.clone())
+            .unwrap_or_else(|| "Unknown".to_string());
+
+        Conversation {
+            id: channel.id.to_string(),
+            protocol: Protocol::Discord,
+            title: Some(name),
+            channel_type: "dm".to_string(),
+            unread_count: 0,
+            last_message_at: None,
+            last_message_preview: None,
+            account_id: self.account_id.clone().unwrap_or_default(),
+        }
+    }
+
     /// Send a protocol event through the callback
     fn emit_event(&self, event: ProtocolEvent) {
         if let Some(ref callback) = self.event_callback {
@@ -379,6 +401,28 @@ impl ProtocolAdapter for DiscordAdapter {
         log::info!("Sent message {} to channel {}", sent_msg.id, channel_id);
         
         Ok(message)
+    }
+
+    async fn create_dm_conversation(
+        &self,
+        user_id: &str,
+    ) -> Result<Conversation, ProtocolError> {
+        let http = self.http()?;
+        
+        // Parse the user ID
+        let user_id = user_id.parse::<u64>()
+            .map_err(|_| DiscordError::InvalidId(format!("Invalid user ID: {}", user_id)))?;
+        
+        // Create DM channel via Discord API
+        let channel = http.create_private_channel(
+            serenity::model::id::UserId::new(user_id)
+        ).await.map_err(|e| DiscordError::Api(e.to_string()))?;
+        
+        let conversation = self.private_channel_to_conversation(&channel);
+        
+        log::info!("Created DM channel {} with user {}", channel.id, user_id);
+        
+        Ok(conversation)
     }
 
     fn on_event(

@@ -212,6 +212,91 @@ pub async fn sync_conversations(
     Ok(count)
 }
 
+/// Create a new DM conversation
+///
+/// Creates a new direct message conversation with a user via the protocol adapter.
+///
+/// # Arguments
+/// * `db` - Database state
+/// * `registry` - Protocol registry
+/// * `account_id` - Account to create conversation for
+/// * `user_id` - User ID to create DM with
+#[tauri::command]
+pub async fn create_dm_conversation(
+    db: State<'_, Database>,
+    registry: State<'_, ProtocolRegistry>,
+    account_id: String,
+    user_id: String,
+) -> Result<Conversation, String> {
+    log::info!("Creating DM conversation for account {} with user {}", account_id, user_id);
+
+    // Get adapter from registry
+    let adapter = registry.get_adapter(&account_id)
+        .await
+        .ok_or_else(|| format!("Account {} not connected", account_id))?;
+
+    // Create conversation via adapter
+    let mut conversation = adapter
+        .create_dm_conversation(&user_id)
+        .await
+        .map_err(|e| format!("Failed to create DM conversation: {}", e))?;
+
+    // Save to database
+    let conn = db.conn().await;
+    let participants_json = serde_json::to_string(&conversation.participants)
+        .unwrap_or_else(|_| "[]".to_string());
+
+    // Insert and get the assigned ID
+    let result = conn
+        .execute(
+            "INSERT INTO conversations
+             (protocol, account_id, protocol_conversation_id, title, participants,
+              last_message_id, last_message_at, last_message_preview, unread_count, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+             ON CONFLICT(protocol, account_id, protocol_conversation_id) DO UPDATE SET
+             title = excluded.title,
+             participants = excluded.participants,
+             updated_at = excluded.updated_at",
+            vec![
+                conversation.protocol.to_string().into(),
+                account_id.clone().into(),
+                conversation.protocol_conversation_id.clone().into(),
+                conversation.title.clone().into(),
+                participants_json.into(),
+                conversation.last_message_id.clone().into(),
+                conversation.last_message_at.into(),
+                conversation.last_message_preview.clone().into(),
+                conversation.unread_count.into(),
+                chrono::Utc::now().timestamp_millis().into(),
+                chrono::Utc::now().timestamp_millis().into(),
+            ],
+        )
+        .await
+        .map_err(|e| format!("Failed to save conversation to database: {}", e))?;
+
+    // Get the inserted row's ID
+    let rows = conn
+        .select(
+            "SELECT id FROM conversations WHERE protocol = ?1 AND account_id = ?2 AND protocol_conversation_id = ?3",
+            vec![
+                conversation.protocol.to_string().into(),
+                account_id.clone().into(),
+                conversation.protocol_conversation_id.clone().into(),
+            ],
+        )
+        .await
+        .map_err(|e| format!("Failed to fetch conversation ID: {}", e))?;
+
+    if let Some(row) = rows.into_iter().next() {
+        if let Some(id) = row.get("id").and_then(|v| v.as_str()) {
+            conversation.id = id.to_string();
+        }
+    }
+
+    log::info!("Created DM conversation {} for account {}", conversation.id, account_id);
+    Ok(conversation)
+}
+
 /// Get conversations for a specific account
 /// 
 /// # Arguments
