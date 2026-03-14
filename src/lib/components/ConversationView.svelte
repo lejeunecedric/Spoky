@@ -1,10 +1,17 @@
 <script lang="ts">
   import { messages, formatTime, formatFullDate, type Message } from '$lib/stores/messages';
   import { selectedConversation } from '$lib/stores/conversations';
-  import { onMount, tick } from 'svelte';
+  import { tick } from 'svelte';
+
+  interface Props {
+    onReply?: (message: Message) => void;
+  }
+
+  let { onReply }: Props = $props();
 
   let messageContainer: HTMLDivElement;
   let isLoading = $state(false);
+  let hoveredMessageId = $state<string | null>(null);
 
   // Load messages when conversation changes
   $effect(() => {
@@ -87,6 +94,9 @@
           class="message"
           class:from-me={message.is_from_me}
           class:reply={message.reply_to_message_id}
+          onmouseenter={() => hoveredMessageId = message.id}
+          onmouseleave={() => hoveredMessageId = null}
+          role="listitem"
         >
           <div class="message-content">
             <div class="message-header">
@@ -103,6 +113,19 @@
             </div>
             
             <div class="message-body">{message.content}</div>
+            
+            {#if hoveredMessageId === message.id}
+              <div class="message-actions">
+                <button 
+                  class="action-btn reply-btn"
+                  onclick={() => onReply?.(message)}
+                  aria-label="Reply to message"
+                  title="Reply"
+                >
+                  ↩ Reply
+                </button>
+              </div>
+            {/if}
           </div>
         </div>
       {:else}
@@ -289,6 +312,38 @@
     line-height: 1.4;
     white-space: pre-wrap;
     word-break: break-word;
+  }
+
+  .message-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.375rem;
+    padding-top: 0.375rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .message.from-me .message-actions {
+    border-top-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .reply-btn {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all 0.15s;
+  }
+
+  .reply-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .message.from-me .reply-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   .empty-state {

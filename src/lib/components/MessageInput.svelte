@@ -1,6 +1,14 @@
 <script lang="ts">
   import { messages } from '$lib/stores/messages';
   import { selectedConversation } from '$lib/stores/conversations';
+  import type { Message } from '$lib/stores/messages';
+
+  interface Props {
+    replyingTo?: Message | null;
+    onCancelReply?: () => void;
+  }
+
+  let { replyingTo = null, onCancelReply }: Props = $props();
 
   let messageText = $state('');
   let isSending = $state(false);
@@ -12,8 +20,13 @@
 
     isSending = true;
     try {
-      await messages.send($selectedConversation.id, content);
+      await messages.send($selectedConversation.id, content, replyingTo?.id);
       messageText = '';
+      
+      // Clear reply state after sending
+      if (replyingTo) {
+        onCancelReply?.();
+      }
       
       // Reset textarea height
       if (inputRef) {
@@ -31,6 +44,10 @@
       event.preventDefault();
       handleSend();
     }
+    if (event.key === 'Escape' && replyingTo) {
+      event.preventDefault();
+      onCancelReply?.();
+    }
   }
 
   function autoResize(event: Event) {
@@ -42,11 +59,23 @@
 
 <div class="message-input">
   {#if $selectedConversation}
+    {#if replyingTo}
+      <div class="reply-preview">
+        <div class="reply-info">
+          <span class="reply-label">↩ Replying to {replyingTo.sender_name || 'Unknown'}</span>
+          <span class="reply-content">{replyingTo.content.slice(0, 100)}{replyingTo.content.length > 100 ? '...' : ''}</span>
+        </div>
+        <button class="cancel-reply" onclick={() => onCancelReply?.()} aria-label="Cancel reply" title="Cancel reply (Esc)">
+          ×
+        </button>
+      </div>
+    {/if}
+    
     <div class="input-container">
       <textarea
         bind:this={inputRef}
         bind:value={messageText}
-        placeholder="Type a message..."
+        placeholder={replyingTo ? "Type your reply..." : "Type a message..."}
         rows="1"
         disabled={isSending}
         onkeydown={handleKeydown}
@@ -169,5 +198,58 @@
     font-size: 0.875rem;
     background: #f9fafb;
     border-radius: 0.5rem;
+  }
+
+  .reply-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #f0f9ff;
+    border-left: 3px solid #0078d4;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+  }
+
+  .reply-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .reply-label {
+    color: #0078d4;
+    font-weight: 500;
+    font-size: 0.75rem;
+  }
+
+  .reply-content {
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cancel-reply {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: #9ca3af;
+    padding: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .cancel-reply:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #6b7280;
   }
 </style>

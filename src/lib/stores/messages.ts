@@ -97,11 +97,12 @@ function createMessagesStore() {
         throw e;
       }
     },
-    send: async (conversationId: string, content: string) => {
+    send: async (conversationId: string, content: string, replyToMessageId?: string) => {
       try {
         const msg = await invoke<Message>('send_message', { 
           conversationId, 
-          content 
+          content,
+          replyToMessageId
         });
         update(msgs => [...msgs, msg]);
         

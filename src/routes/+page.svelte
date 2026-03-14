@@ -3,12 +3,23 @@
   import { listen } from '@tauri-apps/api/event';
   import { accounts } from '$lib/stores/accounts';
   import { conversations } from '$lib/stores/conversations';
-  import { messages } from '$lib/stores/messages';
+  import { messages, type Message } from '$lib/stores/messages';
   
   import AccountManager from '$lib/components/AccountManager.svelte';
   import ConversationList from '$lib/components/ConversationList.svelte';
   import ConversationView from '$lib/components/ConversationView.svelte';
   import MessageInput from '$lib/components/MessageInput.svelte';
+
+  // Reply state
+  let replyingTo = $state<Message | null>(null);
+
+  function handleReply(message: Message) {
+    replyingTo = message;
+  }
+
+  function cancelReply() {
+    replyingTo = null;
+  }
 
   // Listen for protocol events to update UI in real-time
   onMount(() => {
@@ -67,8 +78,8 @@
 
   <!-- Main Content Area -->
   <main class="main-content">
-    <ConversationView />
-    <MessageInput />
+    <ConversationView onReply={handleReply} />
+    <MessageInput replyingTo={replyingTo} onCancelReply={cancelReply} />
   </main>
 </div>
 
