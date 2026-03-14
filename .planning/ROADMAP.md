@@ -53,7 +53,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 02-01: Discord integration with bot token auth, conversation sync, messaging UI
 - [x] 02-02: Discord Gateway real-time message reception (gap closure - MSG-12) ✅ COMPLETED 2026-03-14
-- [ ] 02-03: Reply UI and new conversation flow (gap closure - MSG-05, MSG-06)
+- [x] 02-03: Reply UI and new conversation flow (gap closure - MSG-05, MSG-06) ✅ COMPLETED 2026-03-14
 
 ### Phase 3: WhatsApp Integration
 **Goal**: User can connect WhatsApp and message with WhatsApp contacts
@@ -118,7 +118,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | ✅ Complete | 01-01, 01-02, 01-03 |
-| 2. Discord Integration | 1/1 | ✅ Complete | 02-01 |
+| 2. Discord Integration | 3/3 | ✅ Complete | 02-01, 02-02, 02-03 |
 | 3. WhatsApp Integration | 0/TBD | 📋 Planned | - |
 | 4. Signal Integration | 0/TBD | Not started | - |
 | 5. Media Support | 0/TBD | Not started | - |
