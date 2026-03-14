@@ -96,12 +96,14 @@ pub async fn get_messages(
 /// * `registry` - Protocol registry for adapter access
 /// * `conversation_id` - Target conversation ID
 /// * `content` - Message content to send
+/// * `reply_to_message_id` - Optional message ID to reply to
 #[tauri::command]
 pub async fn send_message(
     db: State<'_, Database>,
     registry: State<'_, ProtocolRegistry>,
     conversation_id: String,
     content: String,
+    reply_to_message_id: Option<String>,
 ) -> Result<Message, String> {
     log::info!("Sending message to conversation {}", conversation_id);
 
@@ -128,7 +130,7 @@ pub async fn send_message(
 
     // Send message via adapter
     let sent_message = adapter
-        .send_message(&conversation_id, &content)
+        .send_message(&conversation_id, &content, reply_to_message_id.as_deref())
         .await
         .map_err(|e| format!("Failed to send message: {}", e))?;
 

@@ -48,10 +48,16 @@ pub trait ProtocolAdapter: Send + Sync {
     ) -> Result<Vec<Message>, ProtocolError>;
 
     /// Send a message in a conversation
+    /// 
+    /// # Arguments
+    /// * `conversation_id` - Target conversation ID
+    /// * `content` - Message content
+    /// * `reply_to_message_id` - Optional message ID to reply to
     async fn send_message(
         &self,
         conversation_id: &str,
         content: &str,
+        reply_to_message_id: Option<&str>,
     ) -> Result<Message, ProtocolError>;
 
     /// Set callback for protocol events

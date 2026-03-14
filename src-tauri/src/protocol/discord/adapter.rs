@@ -148,6 +148,10 @@ impl ProtocolAdapter for DiscordAdapter {
         Protocol::Discord
     }
 
+    fn set_app_handle(&mut self, app_handle: tauri::AppHandle) {
+        self.app_handle = Some(app_handle);
+    }
+
     async fn connect(
         &mut self,
         account: &Account,
@@ -339,15 +343,36 @@ impl ProtocolAdapter for DiscordAdapter {
         &self,
         conversation_id: &str,
         content: &str,
+        reply_to_message_id: Option<&str>,
     ) -> Result<Message, ProtocolError> {
         let http = self.http()?;
         
         let channel_id = conversation_id.parse::<serenity::model::id::ChannelId>()
             .map_err(|_| DiscordError::ChannelNotFound(conversation_id.to_string()))?;
 
-        let sent_msg = channel_id.say(&http,
-            content
-        ).await.map_err(DiscordError::from)?;
+        let sent_msg = if let Some(reply_id) = reply_to_message_id {
+            // Parse the reply message ID
+            let reply_msg_id = reply_id.parse::<serenity::model::id::MessageId>()
+                .map_err(|_| DiscordError::InvalidId(format!("Invalid reply message ID: {}", reply_id)))?;
+            
+            // Send message with reply reference
+            channel_id.send_message(
+                &http,
+                serenity::builder::CreateMessage::new()
+                    .content(content)
+                    .reference_message(serenity::model::channel::MessageReference::new(
+                        serenity::model::channel::MessageReferenceKind::Default,
+                        channel_id,
+                        reply_msg_id,
+                        None,
+                    )),
+            ).await.map_err(DiscordError::from)?
+        } else {
+            // Send regular message
+            channel_id.say(&http,
+                content
+            ).await.map_err(DiscordError::from)?
+        };
 
         let message = self.discord_message_to_message(&sent_msg);
         
